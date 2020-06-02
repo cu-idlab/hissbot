@@ -44,11 +44,10 @@ def handle_channel_message(payload):
     channel_type = event.get('channel_type')
     print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
-    if channel_type in ['group', 'channel'] and text:
+    if channel_type in ['group', 'channel'] and text and user_id != BOT_USERID::
         text = re.sub('\s+', ' ', text)
         if 'this' in text.lower():
-            if user_id != BOT_USERID:
-                this_counts[user_id] = this_counts.get(user_id, 0) + 1
+            this_counts[user_id] = this_counts.get(user_id, 0) + 1
             
             hiss_react = client.reactions_add(
                 channel=channel_id,
@@ -72,8 +71,7 @@ def handle_channel_message(payload):
                 json.dump(this_counts, f)
 
         if 'tension' in text.lower():
-            if user_id != BOT_USERID:
-                tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
+            tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
             hiss_react = client.reactions_add(
                 channel=channel_id,
                 name='jedly',

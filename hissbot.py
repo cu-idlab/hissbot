@@ -42,7 +42,7 @@ def handle_channel_message(payload):
     print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
     if channel_type in ['group', 'channel'] and text:
-        text.replace('\\xc2\\xa0', ' ')
+        text = text.replace('\\xc2\\xa0', ' ')
         if 'this' in text.lower():
             this_counts[user_id] = this_counts.get(user_id, 0) + 1
             
@@ -88,7 +88,7 @@ def handle_mention(payload):
     print('Received text: {} at {} from user {}'.format(text, ts, user_id))
 
     if text:
-        text.replace('\\xc2\\xa0', ' ')
+        text = text.replace('\\xc2\\xa0', ' ')
         tokens = text.split(' ')
         print(tokens)
         if len(tokens) == 2:

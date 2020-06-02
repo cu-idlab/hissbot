@@ -8,6 +8,8 @@ from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 
+BOT_USERID = 'U014YHFD3KK'
+
 allowed_users = ['U16JR6M26' #jed
                 ] 
 
@@ -19,13 +21,13 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
-with open('/var/www/this.json', 'w+') as f:
+with open('/var/www/this.json', 'r') as f:
     try:
         this_counts = Counter(json.load(f))
     except:
         this_counts = Counter()
 
-with open('/var/www/tension.json', 'w+') as f:
+with open('/var/www/tension.json', 'r') as f:
     try:
         tension_counts = Counter(json.load(f))
     except:
@@ -45,7 +47,8 @@ def handle_channel_message(payload):
     if channel_type in ['group', 'channel'] and text:
         text = re.sub('\s+', ' ', text)
         if 'this' in text.lower():
-            this_counts[user_id] = this_counts.get(user_id, 0) + 1
+            if user_id != BOT_USERID:
+                this_counts[user_id] = this_counts.get(user_id, 0) + 1
             
             hiss_react = client.reactions_add(
                 channel=channel_id,
@@ -69,7 +72,8 @@ def handle_channel_message(payload):
                 json.dump(this_counts, f)
 
         if 'tension' in text.lower():
-            tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
+            if user_id != BOT_USERID:
+                tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
             hiss_react = client.reactions_add(
                 channel=channel_id,
                 name='jedly',

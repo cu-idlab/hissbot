@@ -18,21 +18,21 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
-with open('/var/www/this.json') as f:
+with open('/var/www/this.json', 'r+') as f:
     try:
         this_counts = Counter(json.load(f))
     except:
         this_counts = Counter()
 
-with open('/var/www/tension.json') as f:
+with open('/var/www/tension.json', 'r+') as f:
     try:
         tension_counts = Counter(json.load(f))
     except:
         tension_counts = Counter()
 
-@slack_events_adapter.on("message")
+@slack_events_adapter.on("message.groups")
 def handle_group_message(payload):
-    print('Received messages.group event.')
+    print('Received message.groups event.')
     event = payload.get("event", {})
     channel_id = event.get('channel')
     user_id = event.get('user')
@@ -87,6 +87,7 @@ def handle_mention(payload):
     print('Received text: {} at {} from user {}'.format(text, ts, user_id))
 
     if text:
+        text.replace('\xc2\xa0', ' ')
         tokens = text.split(' ')
         if len(tokens) == 2:
             if tokens[1] == 'stats':

@@ -3,6 +3,7 @@
 import os
 import logging
 import random
+import json
 from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
@@ -10,10 +11,13 @@ from slackeventsapi import SlackEventAdapter
 allowed_users = ['U16JR6M26' #jed
                 ] 
 
-app = Flask(__name__)
-slack_events_adapter = SlackEventAdapter(os.environ['HISSBOT_SIGNING_SECRET'], '/', app)
+with open('/var/www/hissbot-config.json') as f:
+    config = json.load(f)
 
-client = WebClient(token=os.environ['HISSBOT_OAUTH_TOKEN'])
+app = Flask(__name__)
+slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', app)
+
+client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
 @slack_events_adapter.on("message")
 def hiss(payload):

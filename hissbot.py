@@ -2,6 +2,7 @@ import os
 import logging
 import random
 import json
+import re
 from collections import Counter
 from flask import Flask
 from slack import WebClient
@@ -42,7 +43,7 @@ def handle_channel_message(payload):
     print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
     if channel_type in ['group', 'channel'] and text:
-        text = text.replace('\xc2\xa0', ' ')
+        text = re.sub('\s+', ' ', text)
         if 'this' in text.lower():
             this_counts[user_id] = this_counts.get(user_id, 0) + 1
             
@@ -88,7 +89,7 @@ def handle_mention(payload):
     print('Received text: {} at {} from user {}'.format(text, ts, user_id))
 
     if text:
-        text = text.replace('\xc2\xa0', ' ')
+        text = re.sub('\s+', ' ', text)
         print('Cleaned text: {}'.format(text))
         tokens = text.split(' ')
         print(tokens)

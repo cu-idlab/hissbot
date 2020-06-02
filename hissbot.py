@@ -47,8 +47,9 @@ def handle_channel_message(payload):
     if channel_type in ['group', 'channel'] and text and user_id != BOT_USERID:
         text = re.sub('\s+', ' ', text)
         if 'this' in text.lower():
-            print("This executed.")
+            print('User id count before: {}'.format(this_counts.get(user_id)))
             this_counts[user_id] = this_counts.get(user_id, 0) + 1
+            print('User id count after: {}'.format(this_counts.get(user_id)))
             
             hiss_react = client.reactions_add(
                 channel=channel_id,

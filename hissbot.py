@@ -44,7 +44,7 @@ def handle_channel_message(payload):
     channel_type = event.get('channel_type')
     print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
-    if channel_type in ['group', 'channel'] and text and user_id != BOT_USERID::
+    if channel_type in ['group', 'channel'] and text and user_id != BOT_USERID:
         text = re.sub('\s+', ' ', text)
         if 'this' in text.lower():
             this_counts[user_id] = this_counts.get(user_id, 0) + 1

@@ -18,11 +18,15 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
-this_counts = Counter()
-tension_counts = Counter()
+with open('/var/www/this.json') as f:
+    this_counts = Counter(json.load(f))
 
-@slack_events_adapter.on("message")
-def hiss(payload):
+with open('/var/www/tension.json') as f:
+    tension_counts = Counter(json.load(f))
+
+@slack_events_adapter.on("message.groups")
+def handle_group_message(payload):
+    print('Received messages.group event.')
     event = payload.get("event", {})
     channel_id = event.get('channel')
     user_id = event.get('user')
@@ -52,6 +56,8 @@ def hiss(payload):
                     name='jedly',
                     timestamp=ts
                 )
+            with open('/var/www/this.json', 'w') as f:
+                json.dump(this_counts, f)
 
         if 'tension' in text.lower():
             tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
@@ -60,9 +66,12 @@ def hiss(payload):
                 name='jedly',
                 timestamp=ts
             )
+            with open('/var/www/tension.json', 'w') as f:
+                json.dump(tension_counts, f)
 
 @slack_events_adapter.on("app_mention")
-def mention_response(payload):
+def handle_mention(payload):
+    print('Received app_mention event.')
     event = payload.get("event", {})
     channel_id = event.get('channel')
     user_id = event.get('user')

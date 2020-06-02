@@ -19,10 +19,16 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
 with open('/var/www/this.json') as f:
-    this_counts = Counter(json.load(f))
+    try:
+        this_counts = Counter(json.load(f))
+    except:
+        this_counts = Counter()
 
 with open('/var/www/tension.json') as f:
-    tension_counts = Counter(json.load(f))
+    try:
+        tension_counts = Counter(json.load(f))
+    except:
+        tension_counts = Counter()
 
 @slack_events_adapter.on("message.groups")
 def handle_group_message(payload):

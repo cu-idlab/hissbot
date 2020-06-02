@@ -30,7 +30,7 @@ with open('/var/www/tension.json') as f:
     except:
         tension_counts = Counter()
 
-@slack_events_adapter.on("message.groups")
+@slack_events_adapter.on("message")
 def handle_group_message(payload):
     print('Received messages.group event.')
     event = payload.get("event", {})
@@ -38,7 +38,8 @@ def handle_group_message(payload):
     user_id = event.get('user')
     text = event.get('text')
     ts = event.get('ts')
-    print('Received text: {} at {} from user {}'.format(text, ts, user_id))
+    channel_type = event.get('channel_type')
+    print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
     if text:
         if 'this' in text.lower():

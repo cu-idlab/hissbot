@@ -18,13 +18,13 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
-with open('/var/www/this.json', 'r+') as f:
+with open('/var/www/this.json', 'w+') as f:
     try:
         this_counts = Counter(json.load(f))
     except:
         this_counts = Counter()
 
-with open('/var/www/tension.json', 'r+') as f:
+with open('/var/www/tension.json', 'w+') as f:
     try:
         tension_counts = Counter(json.load(f))
     except:

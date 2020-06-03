@@ -52,7 +52,7 @@ def handle_channel_message(payload):
 
     if channel_type in ['group', 'channel'] and text and user_id:
         text = re.sub('\s+', ' ', text)
-        if re.search(r'\bthis\b', text, re.IGNORECASE): # 'this' in text.lower():
+        if re.search(r'\bt+h+i+s+\b', text, re.IGNORECASE): # 'this' in text.lower():
             print('User id count before: {}'.format(this_counts.get(user_id)))
             this_counts[user_id] = this_counts.get(user_id, 0) + 1
             print('User id count after: {}'.format(this_counts.get(user_id)))

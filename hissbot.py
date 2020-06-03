@@ -21,23 +21,23 @@ slack_events_adapter = SlackEventAdapter(config['HISSBOT_SIGNING_SECRET'], '/', 
 
 client = WebClient(token=config['HISSBOT_OAUTH_TOKEN'])
 
-with open('/var/www/this.json', 'r') as f:
-    try:
+try:
+    with open('/var/www/this.json', 'r') as f:    
         this_counts = Counter(json.load(f))
-    except:
-        this_counts = Counter()
+except:
+    this_counts = Counter()
 
-with open('/var/www/tension.json', 'r') as f:
-    try:
+try: 
+    with open('/var/www/tension.json', 'r') as f:
         tension_counts = Counter(json.load(f))
-    except:
-        tension_counts = Counter()
+except:
+    tension_counts = Counter()
 
-with open('/var/www/altchi.json', 'r') as f:
-    try:
-        tension_counts = Counter(json.load(f))
-    except:
-        tension_counts = Counter()
+try:
+    with open('/var/www/altchi.json', 'r') as f:
+        altchi_counts = Counter(json.load(f))
+except:
+    altchi_counts = Counter()
 
 @slack_events_adapter.on("message")
 def handle_channel_message(payload):
@@ -89,14 +89,14 @@ def handle_channel_message(payload):
                 json.dump(tension_counts, f)
 
         if re.search(r'\balt\.chi\b', text, re.IGNORECASE):
-            tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
+            altchi_counts[user_id] = altchi_counts.get(user_id, 0) + 1
             hiss_react = client.reactions_add(
                 channel=channel_id,
                 name='cartoonjed',
                 timestamp=ts
             )
             with open('/var/www/altchi.json', 'w') as f:
-                json.dump(tension_counts, f)
+                json.dump(altchi_counts, f)
 
 # @slack_events_adapter.on("app_mention")
 # def handle_mention(payload):
@@ -134,15 +134,15 @@ def handle_channel_message(payload):
 @app.route('/stats', methods=['POST'])
 def stats():
 
-    if len(this_counts) != 0 or len(tension_counts) != 0:
+    if len(this_counts) != 0 or len(tension_counts) != 0 or len(altchi_counts) != 0:
         response = ''
-        for user_id in set(this_counts.keys()).union(set(tension_counts.keys())):
+        for user_id in set(this_counts.keys()).union(set(tension_counts.keys())).union(set(altchi_counts.keys())):
             try:
                 user_info = client.users_info(user=user_id)
                 user_name = user_info['user']['profile']['display_name']
             except:
                 user_name = 'UNKNOWN'
-            response += '*{}* \n _this_: {} times, _tension_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0))
+            response += '*{}* \n _this_: {} times, _tension_: {} times, _alt.chi_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0), altchi_counts.get(user_id, 0))
     else:
         response = 'Nobody has said the magic words.'
     payload = {'response_type': 'in_channel',

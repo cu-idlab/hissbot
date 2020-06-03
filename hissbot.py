@@ -33,6 +33,12 @@ with open('/var/www/tension.json', 'r') as f:
     except:
         tension_counts = Counter()
 
+with open('/var/www/altchi.json', 'r') as f:
+    try:
+        tension_counts = Counter(json.load(f))
+    except:
+        tension_counts = Counter()
+
 @slack_events_adapter.on("message")
 def handle_channel_message(payload):
     print('Received message event.')
@@ -44,9 +50,9 @@ def handle_channel_message(payload):
     channel_type = event.get('channel_type')
     print('Received text: "{}" at {} from user {}. Channel type: {}'.format(text, ts, user_id, channel_type))
 
-    if channel_type in ['group', 'channel'] and text and user:
+    if channel_type in ['group', 'channel'] and text and user_id:
         text = re.sub('\s+', ' ', text)
-        if 'this' in text.lower():
+        if re.search(r'\bthis\b', text, re.IGNORECASE): # 'this' in text.lower():
             print('User id count before: {}'.format(this_counts.get(user_id)))
             this_counts[user_id] = this_counts.get(user_id, 0) + 1
             print('User id count after: {}'.format(this_counts.get(user_id)))
@@ -72,7 +78,7 @@ def handle_channel_message(payload):
             with open('/var/www/this.json', 'w') as f:
                 json.dump(this_counts, f)
 
-        if 'tension' in text.lower():
+        if re.search(r'\btension\b', text, re.IGNORECASE):
             tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
             hiss_react = client.reactions_add(
                 channel=channel_id,
@@ -80,6 +86,16 @@ def handle_channel_message(payload):
                 timestamp=ts
             )
             with open('/var/www/tension.json', 'w') as f:
+                json.dump(tension_counts, f)
+
+        if re.search(r'\balt\.chi\b', text, re.IGNORECASE):
+            tension_counts[user_id] = tension_counts.get(user_id, 0) + 1
+            hiss_react = client.reactions_add(
+                channel=channel_id,
+                name='cartoonjed',
+                timestamp=ts
+            )
+            with open('/var/www/altchi.json', 'w') as f:
                 json.dump(tension_counts, f)
 
 # @slack_events_adapter.on("app_mention")

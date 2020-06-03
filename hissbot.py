@@ -4,7 +4,7 @@ import random
 import json
 import re
 from collections import Counter
-from flask import Flask
+from flask import Flask, jsonify, request
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 
@@ -82,38 +82,52 @@ def handle_channel_message(payload):
             with open('/var/www/tension.json', 'w') as f:
                 json.dump(tension_counts, f)
 
-@slack_events_adapter.on("app_mention")
-def handle_mention(payload):
-    print('Received app_mention event.')
-    event = payload.get("event", {})
-    channel_id = event.get('channel')
-    user_id = event.get('user')
-    text = event.get('text')
-    ts = event.get('ts')
-    print('Received text: {} at {} from user {}'.format(text, ts, user_id))
+# @slack_events_adapter.on("app_mention")
+# def handle_mention(payload):
+#     print('Received app_mention event.')
+#     event = payload.get("event", {})
+#     channel_id = event.get('channel')
+#     user_id = event.get('user')
+#     text = event.get('text')
+#     ts = event.get('ts')
+#     print('Received text: {} at {} from user {}'.format(text, ts, user_id))
 
-    if text:
-        text = re.sub('\s+', ' ', text)
-        print('Cleaned text: {}'.format(text))
-        tokens = text.split(' ')
-        print(tokens)
-        if len(tokens) == 2:
+#     if text:
+#         text = re.sub('\s+', ' ', text)
+#         print('Cleaned text: {}'.format(text))
+#         tokens = text.split(' ')
+#         print(tokens)
+#         if len(tokens) == 2:
             
-            if tokens[1] == 'stats':
-                if len(this_counts) != 0 or len(tension_counts) != 0:
-                    response = ''
-                    for user_id in set(this_counts.keys()).union(set(tension_counts.keys())):
-                        user_info = client.users_info(user=user_id)
-                        user_name = user_info['user']['profile']['display_name']
-                        response += '*{}* \n _this_: {} times, _tension_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0))
+#             if tokens[1] == 'stats':
+#                 if len(this_counts) != 0 or len(tension_counts) != 0:
+#                     response = ''
+#                     for user_id in set(this_counts.keys()).union(set(tension_counts.keys())):
+#                         user_info = client.users_info(user=user_id)
+#                         user_name = user_info['user']['profile']['display_name']
+#                         response += '*{}* \n _this_: {} times, _tension_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0))
 
-                    client.chat_postMessage(channel=channel_id, text=response)
-                else: 
-                    client.chat_postMessage(channel=channel_id, text='Nobody has said the magic words.')
-            else:
-                client.chat_postMessage(channel=channel_id, text='Hissbot can\'t do this yet.')
-        else:
-            client.chat_postMessage(channel=channel_id, text='Hissbot can\'t do this yet.')
+#                     client.chat_postMessage(channel=channel_id, text=response)
+#                 else: 
+#                     client.chat_postMessage(channel=channel_id, text='Nobody has said the magic words.')
+#             else:
+#                 client.chat_postMessage(channel=channel_id, text='Hissbot can\'t do this yet.')
+#         else:
+#             client.chat_postMessage(channel=channel_id, text='Hissbot can\'t do this yet.')
+
+@app.route('/stats', methods=['POST'])
+def stats():
+    response = ''
+
+    for user_id in set(this_counts.keys()).union(set(tension_counts.keys())):
+        user_info = client.users_info(user=user_id)
+        user_name = user_info['user']['profile']['display_name']
+        response += '*{}* \n _this_: {} times, _tension_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0))
+
+    payload = {'response_type': 'in_channel',
+                'text': response}
+
+    return jsonify(payload)
 
 
 if __name__ == "__main__":

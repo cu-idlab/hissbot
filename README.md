@@ -2,7 +2,7 @@
 
  > Hiss!!!
  
-_Developed by the #no committee with :heart:._
+_Developed by the #no committee with :heart:_
 
 ---
 

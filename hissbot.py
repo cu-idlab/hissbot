@@ -120,8 +120,11 @@ def stats():
     response = ''
 
     for user_id in set(this_counts.keys()).union(set(tension_counts.keys())):
-        user_info = client.users_info(user=user_id)
-        user_name = user_info['user']['profile']['display_name']
+        try:
+            user_info = client.users_info(user=user_id)
+            user_name = user_info['user']['profile']['display_name']
+        except:
+            user_name = 'UNKNOWN'
         response += '*{}* \n _this_: {} times, _tension_: {} times. \n'.format(user_name, this_counts.get(user_id, 0), tension_counts.get(user_id, 0))
 
     payload = {'response_type': 'in_channel',

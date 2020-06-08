@@ -2,6 +2,8 @@
 
  > Hiss!!!
  
+An extensible bot framework for your advisor's specific writing quirks.
+
 _Developed by the #no committee with :heart:_
 
 ---
